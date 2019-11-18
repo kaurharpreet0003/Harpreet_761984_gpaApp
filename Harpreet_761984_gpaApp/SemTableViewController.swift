@@ -1,42 +1,33 @@
 //
-//  StudentNameTableViewController.swift
+//  SemTableViewController.swift
 //  Harpreet_761984_gpaApp
 //
-//  Created by MacStudent on 2019-11-15.
+//  Created by Megha Mahna on 2019-11-17.
 //  Copyright © 2019 MacStudent. All rights reserved.
 //
 
 import UIKit
 
-class StudentNameTableViewController: UITableViewController, UISearchBarDelegate {
-    @IBOutlet weak var search_bar: UISearchBar!
-    
-    var studentArray: [student]!
-    var curIndex = -1
+class SemTableViewController: UITableViewController {
+
+    var current_index = -1
+    var delegate:StudentNameTableViewController?
+    var temp = 0.0
+    var student_gpa = ""
+    var total: Double?
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
+        
+        let semester1 = semester(name: "Semester 1", course: ["MAD 3004","MAD 3115", "MAD 2303", "MAD 3463", "MAD 3125"])
+        let semester2 = semester(name: "Semester 2", course: ["MAD 3005","MAD 3115", "MAD 2303", "MAD 3463", "MAD 3125"])
+        let semester3 = semester(name: "Semester 3", course: ["MAD 3006","MAD 3115", "MAD 2303", "MAD 3463", "MAD 3125"])
+        
+                       // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        search_bar.delegate = self
-        studentArray = student.stuArray
-        
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-        
-        
-         studentArray = searchText.isEmpty ? student.stuArray : student.stuArray.filter{ (item: student) -> Bool in
-                    let name = item.first + " " + item.last
-            
-                    return name.lowercased().contains(searchText.lowercased())
-            
-                }
-        tableView.reloadData()
+        semester.sem = [semester1,semester2,semester3]
     }
 
     // MARK: - Table view data source
@@ -44,34 +35,33 @@ class StudentNameTableViewController: UITableViewController, UISearchBarDelegate
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
-        
-        
-        
-        
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return studentArray.count
+        return semester.sem.count
         
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "stu")
         
-        cell?.textLabel?.text = "\(studentArray[indexPath.row].first)" + " " + "\(studentArray[indexPath.row].last)"
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell")
+        cell?.textLabel?.text = semester.sem[indexPath.row].name
+               //cell?.detailTextLabel?.text = Grade.grades[indexPath.row].grade
+               if let label = cell!.viewWithTag(1) as? UILabel{
+                  // if indexPath.row < Grade.grades.count{
+                label.text = semester.sem[indexPath.row].grades[indexPath.row]
+               
+                       //label.text = Grade.grades[indexPath.row].grade
+                       
+                 //  }
+               }
         // Configure the cell...
-        
-        
-            
+
         return cell!
-            
     }
     
-    
-
-
 
     /*
     // Override to support conditional editing of the table view.
@@ -108,27 +98,28 @@ class StudentNameTableViewController: UITableViewController, UISearchBarDelegate
     }
     */
 
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if let detailView = segue.destination as? courseDataViewController{
+            detailView.semDelegate = self
+            if let tableViewCell = sender as? UITableViewCell{
+                if let index = tableView.indexPath(for: tableViewCell)?.row{
+                    current_index = index
+                }
+            }
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
-        if let student_view = segue.destination as? studentInfoViewController{
-            
-            
-            student_view.stuDelegate = self
-            
-            
         }
     }
     
-    
-    
     override func viewWillAppear(_ animated: Bool) {
-        studentArray = student.stuArray
+        tableView.reloadData()
+    
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        delegate?.tableView.reloadData()
         tableView.reloadData()
     }
-    
 
 }
